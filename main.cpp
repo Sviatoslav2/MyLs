@@ -7,6 +7,8 @@
 #include <cmath>
 #include <sstream>
 #include <cstdlib>
+#include <boost/algorithm/string.hpp>
+#include <boost/algorithm/algorithm.hpp>
 #include <algorithm>
 #include <boost/filesystem.hpp>
 #include <utility>
@@ -49,6 +51,24 @@ void change_directory(char *dirPATH) {
 
 }
 
+string mark_specal_file(string file) {
+
+    struct stat st;
+    stat(file.c_str(), &st);
+    if (boost::algorithm::ends_with(file, ".exe")) {
+        file.append("*");
+
+    } else if (boost::filesystem::symlink_status(file).type() == boost::filesystem::symlink_file)
+        return "@";
+    else if (S_ISFIFO(st.st_mode))
+        return "|";
+    else if (S_ISSOCK(st.st_mode))
+        return "=";
+    else if (!S_ISREG(st.st_mode))
+        return "?";
+    return "";
+}
+
 void changeDirectory(const std::string &Directory) {
     const char *cstr = Directory.c_str();
     change_directory((char *) cstr);
@@ -58,21 +78,40 @@ void HelpOfProgram() {
     std::cout << "myls [path|mask] [-l] [-h|--help] [--sort=U|S|t|X|D|s] [-r]" << std::endl;
 }
 
-void printFile(bool IKey, const fs1::path &PathTo) {
+void printFile(bool IKey, const fs1::path &PathTo, bool FKey) {
     if (fs1::is_regular_file(PathTo)) {
         if (IKey) {
             auto buf = fs1::last_write_time(PathTo);
-            std::cout << PathTo.filename().string() << " " << fs1::file_size(PathTo) << " " << time_to_string(buf)
-                      << endl;
+            if (FKey) {
+                std::cout << mark_specal_file(PathTo.filename().string()) << PathTo.filename().string() << " "
+                          << fs1::file_size(PathTo) << " " << time_to_string(buf)
+                          << endl;
+            } else {
+                std::cout << PathTo.filename().string() << " " << fs1::file_size(PathTo) << " " << time_to_string(buf)
+                          << endl;
+            }
         } else {
-            std::cout << PathTo.filename().string() << std::endl;
+            if (FKey) {
+                std::cout << mark_specal_file(PathTo.filename().string()) << PathTo.filename().string() << std::endl;
+            } else {
+                std::cout << PathTo.filename().string() << std::endl;
+            }
         }
     } else {
         if (IKey) {
             auto buf = fs1::last_write_time(PathTo);
-            std::cout << PathTo.filename().string() << " " << " " << time_to_string(buf) << endl;
+            if (FKey) {
+                std::cout << mark_specal_file(PathTo.filename().string()) << PathTo.filename().string() << " " << " "
+                          << time_to_string(buf) << endl;
+            } else {
+                std::cout << PathTo.filename().string() << " " << " " << time_to_string(buf) << endl;
+            }
         } else {
-            std::cout << PathTo.filename().string() << std::endl;
+            if (FKey) {
+                std::cout << mark_specal_file(PathTo.filename().string()) << PathTo.filename().string() << endl;
+            } else {
+                std::cout << PathTo.filename().string() << std::endl;
+            }
         }
     }
 }
@@ -112,7 +151,8 @@ std::vector<fs1::path> SortOfVector(std::vector<fs1::path> Vector, int Key) {
         }
         Vector = NewVector;
     } else if (Key == 5) {
-        //std::sort(Vector.begin(), Vector.end(), [](fs1::path &a, fs1::path &b) {return fs1::file_size(a) > fs1::file_size(b);});
+        cout << "gjhjk\n";
+//        std::sort(Vector.begin(), Vector.end(), [](fs1::path &a, fs1::path &b) {return fs1::file_size(a) > fs1::file_size(b);});
     } else if (Key == 6) {
         std::sort(Vector.begin(), Vector.end(), [](fs1::path &a, fs1::path &b) { return a.string() < b.string(); });
     }
@@ -120,7 +160,8 @@ std::vector<fs1::path> SortOfVector(std::vector<fs1::path> Vector, int Key) {
 }
 
 std::vector<fs1::path>
-vector_of_files_in_directory(const std::string &MainDirectory, const std::string &Directory, int Key, bool RKey) {
+vector_of_files_in_directory(const std::string &MainDirectory, const std::string &Directory, int Key, bool RKey,
+                             bool FKey) {
     changeDirectory(Directory);
 
     std::vector<fs1::path> dataOfVector;
@@ -146,6 +187,7 @@ int main(int argc, char *argv[]) {
     bool lkey = false;
     bool IKey = false;
     bool RKey = false;
+    bool FKey = false;
     int SORT = 0;
     bool rKey = false;
     for (int i = 1; i < argc; i++) {
@@ -156,6 +198,8 @@ int main(int argc, char *argv[]) {
             exit(0);
         } else if (strcmp(argv[i], "-R") == 0) {
             RKey = true;
+        } else if (strcmp(argv[i], "-F") == 0) {
+            FKey = true;
         } else if (strcmp(argv[i], "-r") == 0) {
             rKey = true;
         } else if (strcmp(argv[i], "--sort=U") == 0) {
@@ -183,9 +227,9 @@ int main(int argc, char *argv[]) {
         }
     }
     if (dataFromConsol.empty()) {
-        std::vector<fs1::path> Vector = vector_of_files_in_directory(MainDirectory, MainDirectory, SORT, RKey);
+        std::vector<fs1::path> Vector = vector_of_files_in_directory(MainDirectory, MainDirectory, SORT, RKey, FKey);
         for (auto &p: Vector) {
-            printFile(IKey, p);
+            printFile(IKey, p, FKey);
         }
     } else {
         for (auto &i : dataFromConsol) {
@@ -194,18 +238,19 @@ int main(int argc, char *argv[]) {
                 fs1::path path = get_current_directory() + "/" + path.filename().string();
             }
             if (fs1::is_directory(Path)) {
-                std::vector<fs1::path> Vector = vector_of_files_in_directory(Path.string(), MainDirectory, SORT, RKey);
+                std::vector<fs1::path> Vector = vector_of_files_in_directory(Path.string(), MainDirectory, SORT, RKey,
+                                                                             FKey);
                 if (rKey) {
                     for (int i = Vector.size() - 1; i > 0; --i) {
-                        printFile(lkey, Vector[i]);
+                        printFile(lkey, Vector[i], FKey);
                     }
                 } else {
                     for (auto &p: Vector) {
-                        printFile(lkey, p);
+                        printFile(lkey, p, FKey);
                     }
                 }
             } else if (fs1::is_regular_file(Path)) {
-                printFile(lkey, Path);
+                printFile(lkey, Path, FKey);
             }
         }
     }

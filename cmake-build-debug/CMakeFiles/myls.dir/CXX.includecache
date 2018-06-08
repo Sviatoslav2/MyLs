@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/ka4ka/c++/MyLs/main.cpp
+fstream
+-
+iostream
+-
+thread
+-
+vector
+/home/ka4ka/c++/MyLs/vector
+fcntl.h
+-
+cstring
+-
+cmath
+-
+sstream
+-
+cstdlib
+-
+boost/algorithm/string.hpp
+-
+boost/algorithm/algorithm.hpp
+-
+algorithm
+-
+boost/filesystem.hpp
+-
+utility
+-
+sys/wait.h
+-
+sys/types.h
+-
+sys/stat.h
+-
+unistd.h
+-
+

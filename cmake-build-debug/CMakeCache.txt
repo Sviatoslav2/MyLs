@@ -14,6 +14,12 @@
 # EXTERNAL cache entries
 ########################
 
+//Boost algorithm library (debug)
+Boost_ALGORITHM_LIBRARY_DEBUG:FILEPATH=Boost_ALGORITHM_LIBRARY_DEBUG-NOTFOUND
+
+//Boost algorithm library (release)
+Boost_ALGORITHM_LIBRARY_RELEASE:FILEPATH=Boost_ALGORITHM_LIBRARY_RELEASE-NOTFOUND
+
 //The directory containing a CMake configuration file for Boost.
 Boost_DIR:PATH=Boost_DIR-NOTFOUND
 
@@ -229,6 +235,10 @@ myls_SOURCE_DIR:STATIC=/home/ka4ka/c++/MyLs
 # INTERNAL cache entries
 ########################
 
+//ADVANCED property for variable: Boost_ALGORITHM_LIBRARY_DEBUG
+Boost_ALGORITHM_LIBRARY_DEBUG-ADVANCED:INTERNAL=1
+//ADVANCED property for variable: Boost_ALGORITHM_LIBRARY_RELEASE
+Boost_ALGORITHM_LIBRARY_RELEASE-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: Boost_DIR
 Boost_DIR-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: Boost_FILESYSTEM_LIBRARY_DEBUG
@@ -393,7 +403,7 @@ ProcessorCount_cmd_getconf-ADVANCED:INTERNAL=1
 //ADVANCED property for variable: ProcessorCount_cmd_sysctl
 ProcessorCount_cmd_sysctl-ADVANCED:INTERNAL=1
 //Components requested for this build tree.
-_Boost_COMPONENTS_SEARCHED:INTERNAL=filesystem;system
+_Boost_COMPONENTS_SEARCHED:INTERNAL=algorithm;filesystem;system
 //Last used Boost_INCLUDE_DIR value.
 _Boost_INCLUDE_DIR_LAST:INTERNAL=/usr/include
 //Last used Boost_LIBRARY_DIR_DEBUG value.
